@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import CarteDynamique from "./CarteDynamique";
+import BoutonFavori from "./client_temporaire/BoutonFavori";
+
 import type { Bar, BarAffiche, Position } from "../lib/types";
 import { dateCourteParis, dateParis, distanceKm, formatPrix, heureParis } from "../lib/utils";
 
@@ -290,13 +292,16 @@ export default function Explorateur({ bars, aujourdhui, erreur }: Props) {
                   </p>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => voirSurLaCarte(bar.id)}
-                  className="mt-3 text-sm font-medium text-rose-600"
-                >
-                  Voir sur la carte
-                </button>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => voirSurLaCarte(bar.id)}
+                    className="text-sm font-medium text-rose-600"
+                  >
+                    Voir sur la carte
+                  </button>
+                  <BoutonFavori barId={bar.id} />
+                </div>
               </li>
             );
           })}

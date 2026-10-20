@@ -79,3 +79,22 @@ export type BarGerant = {
   verifie: boolean;
 
 };
+export type ProfilClient = {
+
+  id: string;
+
+  prenom: string;
+
+  date_naissance: string;
+
+  cgu_acceptees: boolean;
+
+};
+
+export type FavoriAffiche = {
+
+  bar_id: string | number;
+
+  bars: { nom: string; adresse: string | null } | null;
+
+};
