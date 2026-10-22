@@ -1,5 +1,7 @@
 "use client";
 
+
+import RaccourcisGerant from "./RaccourcisGerant";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import type { BarGerant } from "../../lib/types";
@@ -74,6 +76,11 @@ export default function TableauDeBord({ bar }: { bar: BarGerant }) {
     e.preventDefault();
     setMessage(null);
 
+    // ÉTAPE 7.15 : on bloque la publication tant que Stripe n'est pas relié
+    if (!bar.stripe_onboarding_complete) {
+      return setMessage("Relie d'abord ton compte bancaire pour pouvoir vendre.");
+    }
+
     const normal = parseFloat(prixNormal.replace(",", "."));
     const reduit = parseFloat(prixReduit.replace(",", "."));
     const qte = parseInt(quantite, 10);
@@ -146,6 +153,22 @@ export default function TableauDeBord({ bar }: { bar: BarGerant }) {
     charger();
   }
 
+  // ÉTAPE 7.13 : relier le compte bancaire via Stripe
+  async function relierStripe() {
+    setMessage(null);
+    const reponse = await fetch("/api/stripe/creer-compte-connect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ barId: bar.id }),
+    });
+    const donnees = await reponse.json();
+    if (donnees.url) {
+      window.location.href = donnees.url;
+    } else {
+      setMessage("Erreur Stripe : " + (donnees.error ?? "inconnue"));
+    }
+  }
+
   return (
     <div className="space-y-8">
       <p className="text-sm text-gray-600">
@@ -153,6 +176,22 @@ export default function TableauDeBord({ bar }: { bar: BarGerant }) {
       </p>
 
       {message && <p className="rounded bg-amber-50 p-3 text-sm text-amber-900">{message}</p>}
+
+      {/* ÉTAPE 7.13 : bouton Stripe */}
+      <RaccourcisGerant />
+      {!bar.stripe_onboarding_complete ? (
+        <button
+          type="button"
+          onClick={relierStripe}
+          className="w-full rounded-full bg-indigo-600 px-4 py-2 font-medium text-white"
+        >
+          Relier mon compte bancaire
+        </button>
+      ) : (
+        <p className="rounded bg-green-50 p-3 text-sm text-green-900">
+          Compte bancaire relié, tu peux vendre.
+        </p>
+      )}
 
       {/* ---------- OFFRES EN COURS ---------- */}
       <section>

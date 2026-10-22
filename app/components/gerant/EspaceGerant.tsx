@@ -41,7 +41,7 @@ export default function EspaceGerant() {
       setChargementBar(true);
       const { data } = await supabase
         .from("bars")
-        .select("id, nom, adresse, verifie")
+.select("id, nom, adresse, verifie, stripe_account_id, stripe_onboarding_complete")
         .eq("owner_id", idUtilisateur)
         .limit(1);
       if (!annule) {

@@ -78,7 +78,12 @@ export type BarGerant = {
 
   verifie: boolean;
 
+  stripe_account_id: string | null;
+
+  stripe_onboarding_complete: boolean;
+
 };
+
 export type ProfilClient = {
 
   id: string;
@@ -96,5 +101,105 @@ export type FavoriAffiche = {
   bar_id: string | number;
 
   bars: { nom: string; adresse: string | null } | null;
+
+
+};
+export type StatutCommande = "payee" | "recuperee" | "expiree";
+
+export type InfosOffreCommande = {
+
+  produit: string | null;
+
+  nom_plat: string | null;
+
+  categorie: string | null;
+
+};
+
+// Supabase renvoie parfois un objet, parfois une liste d'un seul élément
+
+// pour les tables reliées. Ce type accepte les deux.
+
+export type Relie<T> = T | T[] | null;
+
+export type CommandeClient = {
+
+  id: string;
+
+  prix_paye: number;
+
+  statut: StatutCommande;
+
+  qr_token: string;
+
+  created_at: string;
+
+  expire_le: string | null;
+
+  recuperee_le: string | null;
+
+  offres: Relie<InfosOffreCommande>;
+
+  bars: Relie<{ nom: string }>;
+
+};
+
+export type VenteBar = {
+
+  id: string;
+
+  prix_paye: number;
+
+  commission: number;
+
+  statut: StatutCommande;
+
+  created_at: string;
+
+  expire_le: string | null;
+
+  recuperee_le: string | null;
+
+  offres: Relie<InfosOffreCommande>;
+
+};
+
+export type ResultatScan = {
+
+  resultat:
+
+    | "ok"
+
+    | "deja_recuperee"
+
+    | "expiree"
+
+    | "introuvable"
+
+    | "autre_bar"
+
+    | "non_connecte"
+
+    | "erreur";
+
+  produit?: string | null;
+
+  prix?: number;
+
+  prenom?: string | null;
+
+  recuperee_le?: string | null;
+
+  expire_le?: string | null;
+
+  message?: string;
+
+};
+
+export type MonBar = {
+
+  id: string | number;
+
+  nom: string;
 
 };
