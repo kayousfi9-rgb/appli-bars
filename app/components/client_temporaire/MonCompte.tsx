@@ -225,6 +225,17 @@ export default function MonCompte({ profil, email }: Props) {
           Tes commandes et tes QR codes apparaîtront ici dès que le paiement sera
 
           en place.
+<a
+
+          href="/compte/commandes"
+
+          className="mt-3 inline-block rounded-full bg-rose-600 px-4 py-2 text-sm font-medium text-white"
+
+        >
+
+          Voir mes commandes et mes QR codes
+
+        </a>
 
         </p>
 
