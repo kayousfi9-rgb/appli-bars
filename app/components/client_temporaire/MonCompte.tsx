@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { supabase } from "../../lib/supabase";
+import LiensCompte from "./LiensCompte";
+
 
 import type { FavoriAffiche, ProfilClient } from "../../lib/types";
 
@@ -137,6 +139,8 @@ export default function MonCompte({ profil, email }: Props) {
         </div>
 
       </section>
+
+      <LiensCompte />
 
       {message && (
 
