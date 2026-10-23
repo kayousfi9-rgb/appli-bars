@@ -2,7 +2,7 @@ export default function RaccourcisGerant() {
 
   return (
 
-    <div className="my-4 grid gap-3 sm:grid-cols-2">
+    <div className="my-4 grid gap-3 sm:grid-cols-3">
 
       <a
 
@@ -25,6 +25,18 @@ export default function RaccourcisGerant() {
       >
 
         Historique des ventes
+
+      </a>
+
+      <a
+
+        href="/gerant/statistiques"
+
+        className="rounded-xl border border-gray-300 p-4 text-center font-semibold"
+
+      >
+
+        Statistiques
 
       </a>
 

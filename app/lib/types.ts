@@ -203,3 +203,62 @@ export type MonBar = {
   nom: string;
 
 };
+export type VenteStat = {
+
+  id: string;
+
+  prix_paye: number;
+
+  commission: number;
+
+  statut: StatutCommande;
+
+  created_at: string;
+
+  offres: Relie<InfosOffreCommande>;
+
+};
+
+export type VisiteBar = {
+
+  prix_paye: number;
+
+  recuperee_le: string | null;
+
+  bar_id: string | number;
+
+  bars: Relie<{ nom: string; adresse: string | null }>;
+
+};
+
+export type PreferencesNotifications = {
+
+  client_id: string;
+
+  favoris: boolean;
+
+  proximite: boolean;
+
+  latitude: number | null;
+
+  longitude: number | null;
+
+  rayon_km: number;
+
+};
+
+export type NotificationClient = {
+
+  id: string;
+
+  titre: string;
+
+  texte: string;
+
+  lien: string | null;
+
+  lue: boolean;
+
+  cree_le: string;
+
+};
