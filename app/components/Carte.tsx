@@ -14,17 +14,15 @@ import { dateHeureParis, formatPrix } from "../lib/utils";
 
 const CENTRE_PAR_DEFAUT: [number, number] = [48.8412, 2.2995]; // Paris 15e
 
-// Pastille de prix sur la carte (verte avec ⚽ si match ce soir, rouge sinon)
+// Pastille de prix sur la carte (turquoise, avec ⚽ si match ce soir)
 
 function creerIcone(bar: BarAffiche, selectionne: boolean) {
 
   const prixMin = Math.min(...bar.offres.map((o) => o.prix_reduit));
 
-  const fond = bar.matchSoir ? "#16a34a" : "#e11d48";
-
   const ballon = bar.matchSoir ? "⚽ " : "";
 
-  const bordure = selectionne ? "#111827" : "#ffffff";
+  const bordure = selectionne ? "#E2372D" : "#ffffff";
 
   return L.divIcon({
 
@@ -32,7 +30,7 @@ function creerIcone(bar: BarAffiche, selectionne: boolean) {
 
     iconSize: [0, 0],
 
-    html: `<div style="transform:translate(-50%,-100%);background:${fond};color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:999px;border:3px solid ${bordure};box-shadow:0 2px 6px rgba(0,0,0,.35);white-space:nowrap;">${ballon}dès ${formatPrix(prixMin)}</div>`,
+    html: `<div style="transform:translate(-50%,-100%);background:var(--hv-pastille, #007F77);color:#fff;font-weight:700;font-size:13px;padding:4px 9px;border-radius:999px;border:3px solid ${bordure};box-shadow:0 2px 6px rgba(0,0,0,.35);white-space:nowrap;">${ballon}dès ${formatPrix(prixMin)}</div>`,
 
   });
 
@@ -106,6 +104,8 @@ export default function Carte({ bars, position, selectionId, onSelect }: Props) 
 
       scrollWheelZoom
 
+      zoomControl={false}
+
       style={{ height: "100%", width: "100%" }}
 
     >
@@ -136,7 +136,7 @@ export default function Carte({ bars, position, selectionId, onSelect }: Props) 
 
           radius={8}
 
-          pathOptions={{ color: "#1d4ed8", fillColor: "#3b82f6", fillOpacity: 0.9 }}
+          pathOptions={{ color: "#14193C", fillColor: "#00AAA0", fillOpacity: 0.9 }}
 
         />
 
@@ -158,11 +158,11 @@ export default function Carte({ bars, position, selectionId, onSelect }: Props) 
 
           <Popup>
 
-            <div style={{ minWidth: 190, color: "#111827" }}>
+            <div style={{ minWidth: 190, color: "#14193C" }}>
 
               <strong style={{ fontSize: 15 }}>{bar.nom}</strong>
 
-              <div style={{ color: "#6b7280", fontSize: 12 }}>{bar.adresse}</div>
+              <div style={{ color: "#5B607E", fontSize: 12 }}>{bar.adresse}</div>
 
               {bar.horaires && <div style={{ fontSize: 12 }}>🕒 {bar.horaires}</div>}
 
@@ -205,3 +205,4 @@ export default function Carte({ bars, position, selectionId, onSelect }: Props) 
   );
 
 }
+

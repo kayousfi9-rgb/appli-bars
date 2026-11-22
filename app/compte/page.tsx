@@ -1,33 +1,19 @@
-import EspaceClient from "../components/client_temporaire/EspaceClient";
+"use client";
+
+import { useEffect } from "react";
+
+import { useRouter } from "next/navigation";
 
 export default function PageCompte() {
 
-  return (
+  const router = useRouter();
 
-    <main className="min-h-screen bg-white text-gray-900">
+  useEffect(() => {
 
-      <div className="mx-auto max-w-2xl p-4">
+    router.replace("/?onglet=profil");
 
-        <a href="/" className="text-sm text-gray-500 underline">
+  }, [router]);
 
-          ← Retour aux offres
-
-        </a>
-
-        <h1 className="mt-2 text-2xl font-bold">Mon compte</h1>
-
-        <p className="mb-6 text-sm text-gray-600">
-
-          Tes favoris et tes commandes, au même endroit.
-
-        </p>
-
-        <EspaceClient />
-
-      </div>
-
-    </main>
-
-  );
+  return <p className="p-6 text-center text-gray-500">Un instant…</p>;
 
 }
