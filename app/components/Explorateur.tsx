@@ -10,8 +10,10 @@ import BarreOnglets, { type Onglet } from "./BarreOnglets";
 import FiltresCarte, { type FiltreCategorie } from "./FiltresCarte";
 import ListeBars from "./ListeBars";
 import FicheBar from "./FicheBar";
+import CeSoir from "./Cesoir";
 import PageProfil, { type Reglage } from "./client_temporaire/PageProfil";
 import type { Position } from "../lib/types";
+import type { ItemCeSoir } from "../lib/cesoir";
 import type { Etablissement, EtablissementAffiche } from "../lib/etablissements";
 import { dateParis, distanceKm } from "../lib/utils";
 
@@ -20,6 +22,8 @@ type Props = {
   bars: Etablissement[];
   aujourdhui: string; // ex : 2026-11-22 (date du jour à Paris)
   erreur: string | null;
+  ceSoir: ItemCeSoir[];
+  erreurCeSoir: string | null;
 };
 
 
@@ -95,14 +99,20 @@ const STYLE = `
 `;
 
 
-export default function Explorateur({ bars, aujourdhui, erreur }: Props) {
+export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCeSoir }: Props) {
   const router = useRouter();
   const params = useSearchParams();
   const demande = params.get("onglet");
 
 
   const [onglet, setOnglet] = useState<Onglet>(
-    demande === "profil" ? "profil" : demande === "liste" ? "liste" : "carte"
+    demande === "profil"
+      ? "profil"
+      : demande === "liste"
+        ? "liste"
+        : demande === "cesoir"
+          ? "cesoir"
+          : "carte"
   );
   const [recherche, setRecherche] = useState("");
   const [categorie, setCategorie] = useState<FiltreCategorie>("tout");
@@ -352,7 +362,7 @@ export default function Explorateur({ bars, aujourdhui, erreur }: Props) {
 
 
       {/* LES FILTRES QUI FLOTTENT (onglets Carte et Liste) */}
-      {onglet !== "profil" && (
+      {(onglet === "carte" || onglet === "liste") && (
         <FiltresCarte
           recherche={recherche}
           onRecherche={setRecherche}
@@ -470,6 +480,12 @@ export default function Explorateur({ bars, aujourdhui, erreur }: Props) {
           aujourdhui={aujourdhui}
           onVoirSurCarte={voirSurLaCarte}
         />
+      )}
+
+
+      {/* L'ONGLET CE SOIR */}
+      {onglet === "cesoir" && (
+        <CeSoir items={ceSoir} erreur={erreurCeSoir} maintenant={maintenant} />
       )}
 
 
