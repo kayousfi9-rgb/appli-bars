@@ -6,7 +6,8 @@ import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import ModelesRecurrents from "./ModelesRecurrents";
 import DupliquerOffres from "./DupliquerOffres";
-
+import OffresEnCours from "./offresencours";
+import LiensGerant from "./liensgerant";
 
 type Etat =
   | { statut: "chargement" }
@@ -59,6 +60,7 @@ export default function EspacePlanning() {
         ← Retour à mon espace
       </Link>
       <h1 className="mt-3 text-2xl font-extrabold">Planning des offres</h1>
+      <LiensGerant />
 
 
       {etat.statut === "chargement" && <p className="mt-4 text-sm">Chargement…</p>}
@@ -88,6 +90,7 @@ export default function EspacePlanning() {
       {etat.statut === "pret" && (
         <>
           <p className="mt-1 text-sm text-[#5B607E]">{etat.barNom}</p>
+          <OffresEnCours barId={etat.barId} />
           <ModelesRecurrents barId={etat.barId} />
           <DupliquerOffres barId={etat.barId} />
         </>
