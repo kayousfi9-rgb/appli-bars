@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "../../../lib/stripe";
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { barDuGerant, utilisateurDepuisRequete } from "../../../lib/authRoutes";
+import { adresseAppelant, limiteAtteinte, reponseTropDeDemandes } from "../../../lib/limiteur";
 
 
 type Corps = {
@@ -12,10 +13,20 @@ type Corps = {
 
 
 export async function POST(request: NextRequest) {
-  // 1) Il faut être connecté ET gérant d'un bar.
+  // Premier filet : pas plus de 60 appels par minute depuis une même adresse.
+  if (await limiteAtteinte("rembourser:ip:" + adresseAppelant(request), 60, 60)) {
+    return reponseTropDeDemandes();
+  }
+
+
+  // Il faut être connecté ET gérant d'un bar.
   const utilisateur = await utilisateurDepuisRequete(request);
   if (!utilisateur) {
     return NextResponse.json({ erreur: "Tu dois être connecté." }, { status: 401 });
+  }
+  // Second filet : une limite par personne connectée et par heure.
+  if (await limiteAtteinte("rembourser:u:" + utilisateur.id, 30, 3600)) {
+    return reponseTropDeDemandes();
   }
   const bar = await barDuGerant(utilisateur.id);
   if (!bar) {
@@ -30,7 +41,7 @@ export async function POST(request: NextRequest) {
   const reponse = (corps.reponse ?? "").trim().slice(0, 300) || null;
 
 
-  // 2) On relit le signalement DANS LA BASE, et on vérifie qu'il concerne CE bar.
+  // On relit le signalement DANS LA BASE, et on vérifie qu'il concerne CE bar.
   const { data: signalement } = await supabaseAdmin
     .from("signalements")
     .select("id, commande_id, bar_id, statut")
@@ -44,7 +55,7 @@ export async function POST(request: NextRequest) {
   }
 
 
-  // 3) Refus : on note la décision, rien d'autre.
+  // Refus : on note la décision, rien d'autre.
   if (corps.decision === "refuser") {
     await supabaseAdmin
       .from("signalements")
@@ -54,7 +65,7 @@ export async function POST(request: NextRequest) {
   }
 
 
-  // 4) Remboursement : on relit la commande.
+  // Remboursement : on relit la commande.
   const { data: commande } = await supabaseAdmin
     .from("commandes")
     .select("id, statut, prix_paye, stripe_payment_intent_id, rembourse_le")
@@ -71,7 +82,7 @@ export async function POST(request: NextRequest) {
   }
 
 
-  // 5) On demande le remboursement à Stripe. L'argent est repris au bar,
+  // On demande le remboursement à Stripe. L'argent est repris au bar,
   //    et la commission de Happyvo est rendue aussi.
   //    La clé d'idempotence empêche un double remboursement si on clique deux fois.
   let idRemboursement: string;
@@ -92,7 +103,7 @@ export async function POST(request: NextRequest) {
   }
 
 
-  // 6) On note tout dans la base. Une commande pas encore récupérée devient inutilisable.
+  // On note tout dans la base. Une commande pas encore récupérée devient inutilisable.
   await supabaseAdmin
     .from("commandes")
     .update({
@@ -111,3 +122,4 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ ok: true, resultat: "rembourse" });
 }
+

@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { barDuGerant, utilisateurDepuisRequete } from "../../../lib/authRoutes";
+import { adresseAppelant, limiteAtteinte, reponseTropDeDemandes } from "../../../lib/limiteur";
 
 
 export async function POST(request: NextRequest) {
+  // Premier filet : pas plus de 60 appels par minute depuis une même adresse.
+  if (await limiteAtteinte("retirer-serveur:ip:" + adresseAppelant(request), 60, 60)) {
+    return reponseTropDeDemandes();
+  }
+
+
   const utilisateur = await utilisateurDepuisRequete(request);
   if (!utilisateur) {
     return NextResponse.json({ erreur: "Tu dois être connecté." }, { status: 401 });
+  }
+  // Second filet : une limite par personne connectée et par heure.
+  if (await limiteAtteinte("retirer-serveur:u:" + utilisateur.id, 30, 3600)) {
+    return reponseTropDeDemandes();
   }
   const bar = await barDuGerant(utilisateur.id);
   if (!bar) {

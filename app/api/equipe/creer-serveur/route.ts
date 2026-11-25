@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { barDuGerant, utilisateurDepuisRequete } from "../../../lib/authRoutes";
+import { adresseAppelant, limiteAtteinte, reponseTropDeDemandes } from "../../../lib/limiteur";
 
 
 const MAX_SERVEURS = 10;
 
 
 export async function POST(request: NextRequest) {
-  // 1) Qui appelle ? Il faut être connecté ET être gérant d'un bar.
+  // Premier filet : pas plus de 60 appels par minute depuis une même adresse.
+  if (await limiteAtteinte("creer-serveur:ip:" + adresseAppelant(request), 60, 60)) {
+    return reponseTropDeDemandes();
+  }
+
+
+  // Qui appelle ? Il faut être connecté ET être gérant d'un bar.
   const utilisateur = await utilisateurDepuisRequete(request);
   if (!utilisateur) {
     return NextResponse.json({ erreur: "Tu dois être connecté." }, { status: 401 });
+  }
+  // Second filet : une limite par personne connectée et par heure.
+  if (await limiteAtteinte("creer-serveur:u:" + utilisateur.id, 10, 3600)) {
+    return reponseTropDeDemandes();
   }
   const bar = await barDuGerant(utilisateur.id);
   if (!bar) {
@@ -18,7 +29,7 @@ export async function POST(request: NextRequest) {
   }
 
 
-  // 2) On lit et on contrôle ce qui a été tapé.
+  // On lit et on contrôle ce qui a été tapé.
   const corps = (await request.json().catch(() => null)) as {
     prenom?: string;
     email?: string;
@@ -40,7 +51,7 @@ export async function POST(request: NextRequest) {
   }
 
 
-  // 3) Pas plus de 10 serveurs par établissement.
+  // Pas plus de 10 serveurs par établissement.
   const { count } = await supabaseAdmin
     .from("serveurs")
     .select("id", { count: "exact", head: true })
@@ -50,7 +61,7 @@ export async function POST(request: NextRequest) {
   }
 
 
-  // 4) On crée le compte de connexion du serveur.
+  // On crée le compte de connexion du serveur.
   const { data: cree, error: erreurCompte } = await supabaseAdmin.auth.admin.createUser({
     email,
     password: motDePasse,
@@ -65,7 +76,7 @@ export async function POST(request: NextRequest) {
   }
 
 
-  // 5) On le rattache à l'établissement. Si ça rate, on supprime le compte pour ne rien laisser traîner.
+  // On le rattache à l'établissement. Si ça rate, on supprime le compte pour ne rien laisser traîner.
   const { error: erreurLigne } = await supabaseAdmin.from("serveurs").insert({
     bar_id: bar.id,
     user_id: cree.user.id,
@@ -80,3 +91,4 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
+
