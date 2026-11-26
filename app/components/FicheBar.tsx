@@ -2,10 +2,11 @@
 
 
 import { useState, type ReactNode } from "react";
-import BoutonAcheter from "./BoutonAcheter";
+import AcheterAvecAge from "./client_temporaire/AcheterAvecAge";
 import BoutonFavori from "./client_temporaire/BoutonFavori";
 import { nomOffre, type EtablissementAffiche } from "../lib/etablissements";
 import { libelleCategorie, statutHoraires, stockLibelle, tempsRestant } from "../lib/horaires";
+import { boissonAvecAlcool, infosFamille } from "../lib/familles";
 import { dateParis, formatPrix, heureParis } from "../lib/utils";
 
 
@@ -46,7 +47,8 @@ export default function FicheBar({ bar, maintenant, aujourdhui, onFermer }: Prop
 
   const statut = statutHoraires(bar.horaires_semaine, maintenant);
   const matchCeSoir = bar.matchs.find((m) => dateParis(m.date_heure) === aujourdhui);
-  const loisir = bar.categorie_etab === "loisir";
+  const famille = infosFamille(bar.categorie_etab);
+  const alcool = bar.offres.some((o) => boissonAvecAlcool(o));
   const destination = bar.latitude + "," + bar.longitude;
 
 
@@ -58,6 +60,7 @@ export default function FicheBar({ bar, maintenant, aujourdhui, onFermer }: Prop
 
 
   const tags: string[] = [libelleCategorie(bar.categorie_etab)];
+  if (bar.etiquette) tags.push(majuscule(bar.etiquette));
   if (bar.type_bar) tags.push(majuscule(bar.type_bar));
   if (bar.ambiance) tags.push(majuscule(bar.ambiance));
   if (bar.terrasse) tags.push("Terrasse");
@@ -98,10 +101,10 @@ export default function FicheBar({ bar, maintenant, aujourdhui, onFermer }: Prop
         ) : (
           <div
             className="flex h-24 w-full items-center justify-center text-5xl"
-            style={{ background: loisir ? "#3B4A9E" : "#00AAA0" }}
+            style={{ background: famille.couleur }}
             aria-hidden="true"
           >
-            {loisir ? "🎯" : "🍻"}
+            {famille.emoji}
           </div>
         )}
 
@@ -175,7 +178,7 @@ export default function FicheBar({ bar, maintenant, aujourdhui, onFermer }: Prop
                     {reste && <Etiquette urgent={reste.urgent}>{"⏱ " + reste.texte}</Etiquette>}
                   </div>
                   <div className="hv-acheter mt-3">
-                    <BoutonAcheter offreId={String(offre.id)} />
+                    <AcheterAvecAge offreId={String(offre.id)} avecAlcool={boissonAvecAlcool(offre)} />
                   </div>
                 </li>
               );
@@ -212,7 +215,7 @@ export default function FicheBar({ bar, maintenant, aujourdhui, onFermer }: Prop
           </div>
 
 
-          {!loisir && (
+          {alcool && (
             <p className="text-center text-xs" style={{ color: "var(--hv-texte-doux)" }}>
               {"L'abus d'alcool est dangereux pour la santé, à consommer avec modération. Vente d'alcool interdite aux mineurs."}
             </p>

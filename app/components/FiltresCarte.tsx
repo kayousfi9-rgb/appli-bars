@@ -3,9 +3,10 @@
 
 import { useState } from "react";
 import { formatPrix } from "../lib/utils";
+import { FAMILLES, type Famille } from "../lib/familles";
 
 
-export type FiltreCategorie = "tout" | "bars" | "loisirs";
+export type FiltreCategorie = "tout" | Famille;
 
 
 type Panneau = "boisson" | "prix" | "ambiance" | "rayon" | null;
@@ -16,6 +17,9 @@ type Props = {
   onRecherche: (valeur: string) => void;
   categorie: FiltreCategorie;
   onCategorie: (categorie: FiltreCategorie) => void;
+  etiquettes: string[];
+  etiquette: string;
+  onEtiquette: (etiquette: string) => void;
   boissonsDispo: string[];
   boissons: string[];
   onToggleBoisson: (boisson: string) => void;
@@ -94,6 +98,9 @@ export default function FiltresCarte({
   onRecherche,
   categorie,
   onCategorie,
+  etiquettes,
+  etiquette,
+  onEtiquette,
   boissonsDispo,
   boissons,
   onToggleBoisson,
@@ -128,7 +135,8 @@ export default function FiltresCarte({
 
 
   const libelleRayon = RAYONS.find((r) => r.valeur === rayon)?.libelle ?? "";
-  const pourLesBars = categorie !== "loisirs";
+  // les filtres « boisson » et « match » n'ont de sens que pour manger & boire
+  const pourLesBars = categorie === "tout" || categorie === "manger_boire";
 
 
   return (
@@ -171,8 +179,14 @@ export default function FiltresCarte({
       {/* LES PASTILLES DE FILTRES */}
       <div className="hv-defile pointer-events-auto mt-2 flex gap-2 overflow-x-auto pb-1">
         <Pastille libelle="Tout" actif={categorie === "tout"} onClick={() => choisirCategorie("tout")} />
-        <Pastille libelle="🍻 Bars" actif={categorie === "bars"} onClick={() => choisirCategorie("bars")} />
-        <Pastille libelle="🎯 Loisirs" actif={categorie === "loisirs"} onClick={() => choisirCategorie("loisirs")} />
+        {FAMILLES.map((f) => (
+          <Pastille
+            key={f.id}
+            libelle={f.emoji + " " + f.libelle}
+            actif={categorie === f.id}
+            onClick={() => choisirCategorie(f.id)}
+          />
+        ))}
         {pourLesBars && (
           <Pastille
             libelle={boissons.length > 0 ? "🍹 Boisson · " + boissons.length : "🍹 Boisson"}
@@ -207,6 +221,17 @@ export default function FiltresCarte({
         )}
         {filtresActifs && <Pastille libelle="✕ Effacer" actif={false} onClick={onReinitialiser} />}
       </div>
+
+
+      {/* LES ÉTIQUETTES DE LA FAMILLE CHOISIE (laser game, padel, boulangerie…) */}
+      {categorie !== "tout" && etiquettes.length > 0 && (
+        <div className="hv-defile pointer-events-auto flex gap-2 overflow-x-auto pb-1">
+          <Pastille libelle="Tous" actif={etiquette === "toutes"} onClick={() => onEtiquette("toutes")} />
+          {etiquettes.map((e) => (
+            <Pastille key={e} libelle={majuscule(e)} actif={etiquette === e} onClick={() => onEtiquette(e)} />
+          ))}
+        </div>
+      )}
 
 
       {/* LE PETIT PANNEAU QUI S'OUVRE SOUS LES PASTILLES */}

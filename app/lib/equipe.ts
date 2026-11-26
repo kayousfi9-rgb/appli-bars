@@ -27,6 +27,7 @@ export function nomOffreLiee(offres: Lie<OffreLiee>): string {
   const o = premierLie(offres);
   if (!o) return "Offre";
   if (o.categorie === "plat") return o.nom_plat || "Plat";
+  if (o.categorie === "activite") return o.nom_plat || o.produit || "Activité";
   return o.produit || "Boisson";
 }
 

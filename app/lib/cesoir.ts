@@ -9,6 +9,7 @@ import {
   type OffreRecurrente,
 } from "./recurrence";
 import type { CategorieEtab } from "./etablissements";
+import { aUnNomLibre } from "./familles";
 
 
 // Une ligne de l'onglet « Ce soir »
@@ -119,7 +120,7 @@ export async function recupererCeSoir(): Promise<ResultatCeSoir> {
       latitude: o.bars.latitude,
       longitude: o.bars.longitude,
       categorieEtab: o.bars.categorie_etab,
-      titre: o.categorie === "plat" && o.nom_plat ? o.nom_plat : o.produit,
+      titre: aUnNomLibre(o.categorie) && o.nom_plat ? o.nom_plat : o.produit,
       prixNormal: o.prix_normal,
       prixReduit: o.prix_reduit,
       quantite: o.quantite,

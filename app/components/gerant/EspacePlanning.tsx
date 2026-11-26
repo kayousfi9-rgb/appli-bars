@@ -8,6 +8,8 @@ import ModelesRecurrents from "./ModelesRecurrents";
 import DupliquerOffres from "./DupliquerOffres";
 import OffresEnCours from "./offresencours";
 import LiensGerant from "./liensgerant";
+import NouvelleOffre from "./NouvelleOffre";
+
 
 type Etat =
   | { statut: "chargement" }
@@ -19,6 +21,8 @@ type Etat =
 
 export default function EspacePlanning() {
   const [etat, setEtat] = useState<Etat>({ statut: "chargement" });
+  // quand on publie une offre, on change ce numéro pour que les listes se relisent
+  const [version, setVersion] = useState(0);
 
 
   useEffect(() => {
@@ -90,9 +94,10 @@ export default function EspacePlanning() {
       {etat.statut === "pret" && (
         <>
           <p className="mt-1 text-sm text-[#5B607E]">{etat.barNom}</p>
-          <OffresEnCours barId={etat.barId} />
+          <NouvelleOffre barId={etat.barId} onPubliee={() => setVersion((v) => v + 1)} />
+          <OffresEnCours key={"en-cours-" + version} barId={etat.barId} />
           <ModelesRecurrents barId={etat.barId} />
-          <DupliquerOffres barId={etat.barId} />
+          <DupliquerOffres key={"dupliquer-" + version} barId={etat.barId} />
         </>
       )}
     </main>

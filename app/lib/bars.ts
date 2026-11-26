@@ -6,7 +6,7 @@ export type ResultatBars = { bars: Etablissement[]; erreur: string | null };
 
 
 const COLONNES =
-  "id, nom, adresse, latitude, longitude, type_bar, terrasse, ambiance, horaires, categorie_etab, photo_url, horaires_semaine, offres(id, produit, type_boisson, prix_normal, prix_reduit, debut, fin, quantite, categorie, nom_plat), matchs(id, intitule, date_heure)";
+  "id, nom, adresse, latitude, longitude, type_bar, terrasse, ambiance, horaires, categorie_etab, etiquette, photo_url, horaires_semaine, offres(id, produit, type_boisson, prix_normal, prix_reduit, debut, fin, quantite, categorie, nom_plat), matchs(id, intitule, date_heure)";
 
 
 export async function recupererBars(): Promise<ResultatBars> {

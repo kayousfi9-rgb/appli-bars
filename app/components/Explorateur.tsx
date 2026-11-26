@@ -12,6 +12,8 @@ import ListeBars from "./ListeBars";
 import FicheBar from "./FicheBar";
 import CeSoir from "./Cesoir";
 import PageProfil, { type Reglage } from "./client_temporaire/PageProfil";
+import PorteConditions from "./PorteConditions";
+import LiensLegaux from "./LiensLegaux";
 import type { Position } from "../lib/types";
 import type { ItemCeSoir } from "../lib/cesoir";
 import type { Etablissement, EtablissementAffiche } from "../lib/etablissements";
@@ -116,6 +118,7 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
   );
   const [recherche, setRecherche] = useState("");
   const [categorie, setCategorie] = useState<FiltreCategorie>("tout");
+  const [etiquette, setEtiquette] = useState("toutes");
   const [boissons, setBoissons] = useState<string[]>([]);
   const [ambiance, setAmbiance] = useState("toutes");
   const [prixMax, setPrixMax] = useState<number | null>(null);
@@ -211,6 +214,15 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
   }, [bars]);
 
 
+  // Les étiquettes de la famille choisie (laser game, padel, boulangerie…)
+  const etiquettes = useMemo(() => {
+    const toutes = bars
+      .filter((b) => categorie === "tout" || b.categorie_etab === categorie)
+      .map((b) => (b.etiquette ?? "").trim().toLowerCase());
+    return Array.from(new Set(toutes.filter((e) => e !== ""))).sort();
+  }, [bars, categorie]);
+
+
   const prixPlafond = useMemo(() => {
     const prix = bars.flatMap((b) => b.offres.map((o) => o.prix_reduit));
     return Math.max(5, Math.ceil(Math.max(0, ...prix)));
@@ -223,12 +235,12 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
 
 
     for (const bar of bars) {
-      if (categorie === "bars" && bar.categorie_etab === "loisir") continue;
-      if (categorie === "loisirs" && bar.categorie_etab !== "loisir") continue;
+      if (categorie !== "tout" && bar.categorie_etab !== categorie) continue;
+      if (etiquette !== "toutes" && (bar.etiquette ?? "").trim().toLowerCase() !== etiquette) continue;
 
 
       if (mot) {
-        const texte = (bar.nom + " " + (bar.adresse ?? "")).toLowerCase();
+        const texte = (bar.nom + " " + (bar.adresse ?? "") + " " + (bar.etiquette ?? "")).toLowerCase();
         if (!texte.includes(mot)) continue;
       }
       if (ambiance !== "toutes" && bar.ambiance !== ambiance) continue;
@@ -266,7 +278,7 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
         ? a.distanceKm - b.distanceKm
         : a.offres[0].prix_reduit - b.offres[0].prix_reduit
     );
-  }, [bars, recherche, categorie, boissons, ambiance, prixMax, matchSoir, rayon, position, aujourdhui, maintenant]);
+  }, [bars, recherche, categorie, etiquette, boissons, ambiance, prixMax, matchSoir, rayon, position, aujourdhui, maintenant]);
 
 
   const selection = barsAffiches.find((b) => b.id === selectionId) ?? null;
@@ -275,6 +287,7 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
   const filtresActifs =
     recherche !== "" ||
     categorie !== "tout" ||
+    etiquette !== "toutes" ||
     boissons.length > 0 ||
     ambiance !== "toutes" ||
     prixMax !== null ||
@@ -291,8 +304,9 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
 
   function changerCategorie(nouvelle: FiltreCategorie) {
     setCategorie(nouvelle);
-    if (nouvelle === "loisirs") {
-      // ces deux filtres n'ont pas de sens pour les loisirs
+    setEtiquette("toutes");
+    if (nouvelle === "sport_bienetre" || nouvelle === "sorties") {
+      // ces deux filtres n'ont pas de sens pour le sport, le bien-être et les sorties
       setBoissons([]);
       setMatchSoir(false);
     }
@@ -322,6 +336,7 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
   function reinitialiser() {
     setRecherche("");
     setCategorie("tout");
+    setEtiquette("toutes");
     setBoissons([]);
     setAmbiance("toutes");
     setPrixMax(null);
@@ -337,7 +352,7 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
   }
 
 
-  const mots = categorie === "bars" ? ["bar", "bars"] : ["lieu", "lieux"];
+  const mots = ["lieu", "lieux"];
 
 
   return (
@@ -368,6 +383,9 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
           onRecherche={setRecherche}
           categorie={categorie}
           onCategorie={changerCategorie}
+          etiquettes={etiquettes}
+          etiquette={etiquette}
+          onEtiquette={setEtiquette}
           boissonsDispo={boissonsDispo}
           boissons={boissons}
           onToggleBoisson={basculerBoisson}
@@ -490,7 +508,16 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
 
 
       {/* L'ONGLET PROFIL */}
-      {onglet === "profil" && <PageProfil reglage={reglage} onReglage={changerReglage} />}
+      {onglet === "profil" && (
+        <>
+          <PageProfil reglage={reglage} onReglage={changerReglage} />
+          <LiensLegaux />
+        </>
+      )}
+
+
+      {/* L'ÉCRAN D'ACCEPTATION DES CONDITIONS (seulement si besoin) */}
+      <PorteConditions />
 
 
       {/* LA BARRE D'ONGLETS, TOUJOURS EN BAS */}
@@ -498,3 +525,4 @@ export default function Explorateur({ bars, aujourdhui, erreur, ceSoir, erreurCe
     </div>
   );
 }
+

@@ -4,6 +4,7 @@
 import { useState } from "react";
 import type { ItemCeSoir } from "../lib/cesoir";
 import { formatPrix } from "../lib/utils";
+import { FAMILLES, infosFamille, type Famille } from "../lib/familles";
 
 
 type Props = {
@@ -13,7 +14,7 @@ type Props = {
 };
 
 
-type Filtre = "tout" | "bars" | "loisirs";
+type Filtre = "tout" | Famille;
 
 
 // « dans 45 min », « dans 2 h 10 »
@@ -37,16 +38,14 @@ export default function CeSoir({ items, erreur, maintenant }: Props) {
 
 
   const affiches = items.filter((i) => {
-    if (filtre === "bars") return i.categorieEtab !== "loisir";
-    if (filtre === "loisirs") return i.categorieEtab === "loisir";
-    return true;
+    if (filtre === "tout") return true;
+    return i.categorieEtab === filtre;
   });
 
 
   const pastilles: { id: Filtre; texte: string }[] = [
     { id: "tout", texte: "Tout" },
-    { id: "bars", texte: "Bars" },
-    { id: "loisirs", texte: "Loisirs" },
+    ...FAMILLES.map((f) => ({ id: f.id as Filtre, texte: f.emoji + " " + f.libelle })),
   ];
 
 
@@ -65,13 +64,13 @@ export default function CeSoir({ items, erreur, maintenant }: Props) {
       </p>
 
 
-      <div className="mt-4 flex gap-2">
+      <div className="hv-defile mt-4 flex gap-2 overflow-x-auto pb-1">
         {pastilles.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => setFiltre(p.id)}
-            className="rounded-full border px-4 py-1.5 text-sm font-semibold"
+            className="shrink-0 rounded-full border px-4 py-1.5 text-sm font-semibold"
             style={{
               borderColor: filtre === p.id ? "var(--hv-bouton-fond)" : "var(--hv-bord)",
               background: filtre === p.id ? "var(--hv-bouton-fond)" : "var(--hv-fond)",
@@ -104,7 +103,7 @@ export default function CeSoir({ items, erreur, maintenant }: Props) {
       <ul className="mt-4 space-y-3">
         {affiches.map((item) => {
           const compte = dans(item.debutMs, maintenant);
-          const loisir = item.categorieEtab === "loisir";
+          const famille = infosFamille(item.categorieEtab);
           return (
             <li
               key={item.cle}
@@ -115,7 +114,7 @@ export default function CeSoir({ items, erreur, maintenant }: Props) {
                 <div className="min-w-0">
                   <p className="text-base font-bold">{item.titre}</p>
                   <p className="truncate text-sm" style={{ color: "var(--hv-texte-doux)" }}>
-                    {(loisir ? "🎯 " : "🍻 ") + item.barNom}
+                    {famille.emoji + " " + item.barNom}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">

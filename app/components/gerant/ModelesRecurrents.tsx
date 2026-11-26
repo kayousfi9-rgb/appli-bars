@@ -36,7 +36,7 @@ export default function ModelesRecurrents({ barId }: Props) {
 
 
   // Le formulaire
-  const [categorie, setCategorie] = useState<"boisson" | "plat">("boisson");
+  const [categorie, setCategorie] = useState<"boisson" | "plat" | "activite">("boisson");
   const [nom, setNom] = useState("");
   const [typeBoisson, setTypeBoisson] = useState("bière");
   const [prixNormal, setPrixNormal] = useState("");
@@ -95,7 +95,7 @@ export default function ModelesRecurrents({ barId }: Props) {
       bar_id: barId,
       categorie,
       produit: nom.trim(),
-      nom_plat: categorie === "plat" ? nom.trim() : null,
+      nom_plat: categorie !== "boisson" ? nom.trim() : null,
       type_boisson: categorie === "boisson" ? typeBoisson : null,
       prix_normal: normal,
       prix_reduit: reduit,
@@ -200,22 +200,22 @@ export default function ModelesRecurrents({ barId }: Props) {
 
 
         <div className="flex gap-2">
-          {(["boisson", "plat"] as const).map((c) => (
+          {(["boisson", "plat", "activite"] as const).map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => setCategorie(c)}
               className={"flex-1 rounded-full border px-3 py-2 text-sm font-semibold " + (categorie === c ? "border-[#007F77] bg-[#007F77] text-white" : "border-[#E7DDC8] bg-white")}
             >
-              {c === "boisson" ? "Boisson" : "Plat / activité"}
+              {c === "boisson" ? "Boisson" : c === "plat" ? "Plat" : "Activité"}
             </button>
           ))}
         </div>
 
 
         <label className="block text-sm font-semibold">
-          {categorie === "boisson" ? "Nom de la boisson" : "Nom du plat ou de l'activité"}
-          <input className={CHAMP + " mt-1 font-normal"} value={nom} onChange={(e) => setNom(e.target.value)} placeholder={categorie === "boisson" ? "Pinte de blonde" : "Partie de laser game"} />
+          {categorie === "boisson" ? "Nom de la boisson" : categorie === "plat" ? "Nom du plat" : "Nom de l'activité"}
+          <input className={CHAMP + " mt-1 font-normal"} value={nom} onChange={(e) => setNom(e.target.value)} placeholder={categorie === "boisson" ? "Pinte de blonde" : categorie === "plat" ? "Burger du jour" : "Partie de laser game"} />
         </label>
 
 

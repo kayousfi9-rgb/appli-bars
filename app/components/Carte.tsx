@@ -8,6 +8,7 @@ import { MapContainer, TileLayer, Marker, CircleMarker, useMap, useMapEvents } f
 import type { Position } from "../lib/types";
 import type { EtablissementAffiche } from "../lib/etablissements";
 import { offreUrgente } from "../lib/horaires";
+import { infosFamille } from "../lib/familles";
 import { formatPrix } from "../lib/utils";
 
 
@@ -23,7 +24,6 @@ const ZOOM_SANS_REGROUPEMENT = 17;
 // Les couleurs des étoiles (à changer ici, à un seul endroit)
 const COULEURS = {
   bar: "#00AAA0",
-  loisir: "#3B4A9E",
   urgent: "#E2372D",
   contour: "#14193C",
   creme: "#FFF4E2",
@@ -93,13 +93,13 @@ function MarqueurEtoile({
   const prixMin = Math.min(...bar.offres.map((o) => o.prix_reduit));
   const urgent = bar.offres.some((o) => offreUrgente(o.fin, maintenant));
   const etiquette = (bar.matchSoir ? "⚽ " : "") + "dès " + formatPrix(prixMin);
-  const loisir = bar.categorie_etab === "loisir";
+  const famille = infosFamille(bar.categorie_etab);
 
 
   const icone = useMemo(() => {
-    const couleur = urgent ? COULEURS.urgent : loisir ? COULEURS.loisir : COULEURS.bar;
+    const couleur = urgent ? COULEURS.urgent : famille.couleur;
     return creerIconeEtoile(couleur, selectionne, etiquette);
-  }, [urgent, loisir, selectionne, etiquette]);
+  }, [urgent, famille.couleur, selectionne, etiquette]);
 
 
   return (

@@ -9,7 +9,7 @@ export const JOURS_LONGS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "
 export type OffreRecurrente = {
   id: string;
   bar_id: string | number;
-  categorie: "boisson" | "plat";
+  categorie: "boisson" | "plat" | "activite";
   produit: string;
   nom_plat: string | null;
   type_boisson: string | null;
@@ -66,5 +66,5 @@ export function libelleJours(jours: number[]): string {
 
 // Nom à afficher : le nom du plat, ou le produit
 export function nomModele(m: Pick<OffreRecurrente, "categorie" | "nom_plat" | "produit">): string {
-  return m.categorie === "plat" && m.nom_plat ? m.nom_plat : m.produit;
+  return (m.categorie === "plat" || m.categorie === "activite") && m.nom_plat ? m.nom_plat : m.produit;
 }

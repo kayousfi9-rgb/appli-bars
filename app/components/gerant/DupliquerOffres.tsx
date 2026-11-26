@@ -168,7 +168,7 @@ export default function DupliquerOffres({ barId }: Props) {
 
         {offres.map((o) => (
           <div key={o.id} className="rounded-xl border border-[#E7DDC8] bg-[#FFF4E2] p-3">
-            <p className="font-bold">{o.categorie === "plat" && o.nom_plat ? o.nom_plat : o.produit}</p>
+            <p className="font-bold">{(o.categorie === "plat" || o.categorie === "activite") && o.nom_plat ? o.nom_plat : o.produit}</p>
             <p className="text-sm">{formatPrix(o.prix_reduit) + " au lieu de " + formatPrix(o.prix_normal)}</p>
             <p className="text-sm text-[#5B607E]">{formatJourHeure(o.debut) + " → " + formatJourHeure(o.fin)}</p>
 

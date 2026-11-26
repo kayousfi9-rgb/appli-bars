@@ -1,4 +1,5 @@
 import { heureParis } from "./utils";
+import { infosFamille } from "./familles";
 
 
 export type Creneau = [string, string]; // par exemple ["12:00", "23:30"]
@@ -129,7 +130,6 @@ export function stockLibelle(quantite: number | null): { texte: string; urgent: 
 
 
 export function libelleCategorie(categorie: string): string {
-  if (categorie === "loisir") return "Loisir";
-  if (categorie === "restaurant") return "Restaurant";
-  return "Bar";
+  return infosFamille(categorie).libelle;
 }
+
