@@ -3,6 +3,7 @@ import { stripe } from "../../../lib/stripe";
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { barDuGerant, utilisateurDepuisRequete } from "../../../lib/authRoutes";
 import { adresseAppelant, limiteAtteinte, reponseTropDeDemandes } from "../../../lib/limiteur";
+import { signalerProbleme } from "../../../lib/alertes";
 
 
 type Corps = {
@@ -99,12 +100,13 @@ export async function POST(request: NextRequest) {
     idRemboursement = remboursement.id;
   } catch (erreur) {
     const message = erreur instanceof Error ? erreur.message : "erreur inconnue";
+    await signalerProbleme("Remboursement refusé par Stripe", { commande_id: String(commande.id), message });
     return NextResponse.json({ erreur: "Stripe a refusé le remboursement : " + message }, { status: 502 });
   }
 
 
   // On note tout dans la base. Une commande pas encore récupérée devient inutilisable.
-  await supabaseAdmin
+  const { error: erreurMaj } = await supabaseAdmin
     .from("commandes")
     .update({
       rembourse_le: new Date().toISOString(),
@@ -112,6 +114,13 @@ export async function POST(request: NextRequest) {
       statut: commande.statut === "payee" ? "expiree" : commande.statut,
     })
     .eq("id", commande.id);
+  if (erreurMaj) {
+    await signalerProbleme("Remboursement effectué chez Stripe mais commande non mise à jour", {
+      commande_id: String(commande.id),
+      remboursement: idRemboursement,
+      message: erreurMaj.message,
+    });
+  }
 
 
   await supabaseAdmin
@@ -122,4 +131,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ ok: true, resultat: "rembourse" });
 }
-

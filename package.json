@@ -9,8 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@sentry/nextjs": "^11.19.0",
     "@stripe/stripe-js": "^10.1.0",
     "@supabase/supabase-js": "^2.118.0",
+    "@vercel/analytics": "^2.0.1",
     "html5-qrcode": "^2.3.8",
     "leaflet": "^1.9.4",
     "next": "^16.4.6",

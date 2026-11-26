@@ -43,7 +43,7 @@ const SECTIONS: SectionLegale[] = [
     paragraphes: [
       "Happyvo ne vend pas tes données. Elles sont traitées par des prestataires techniques qui agissent pour notre compte : Supabase (base de données et connexion), Vercel (hébergement de l'application), Stripe (paiement).",
       "L'établissement auprès duquel tu commandes voit ce qui est nécessaire à la préparation et au retrait de ta commande (offre, prénom si renseigné, état de la commande), jamais ton adresse e-mail ni tes données de paiement.",
-      "[À COMPLÉTER : autres prestataires éventuels, par exemple fournisseur de fonds de carte, service de suivi d'erreurs, outil de mesure d'audience.]",
+      "Sentry (suivi des erreurs techniques : en cas de plantage, des informations techniques comme le type d'appareil, le navigateur et la page concernée lui sont transmises, sans ton nom ni ton e-mail) et Vercel Web Analytics (mesure d'audience anonyme, sans cookie). [À COMPLÉTER : fournisseur de fonds de carte, le cas échéant]",
     ],
   },
   {
@@ -63,7 +63,7 @@ const SECTIONS: SectionLegale[] = [
   {
     titre: "Cookies et traceurs",
     paragraphes: [
-      "L'application utilise uniquement le stockage nécessaire à son fonctionnement (maintien de ta connexion, préférences d'affichage). Aucun cookie publicitaire n'est utilisé. [À METTRE À JOUR SI UN OUTIL DE MESURE D'AUDIENCE EST AJOUTÉ]",
+      "L'application utilise uniquement le stockage nécessaire à son fonctionnement (maintien de ta connexion, préférences d'affichage). Aucun cookie publicitaire n'est utilisé. La mesure d'audience (Vercel Web Analytics) fonctionne sans cookie et n'identifie pas les personnes.",
     ],
   },
   {

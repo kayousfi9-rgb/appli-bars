@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "../../../lib/stripe";
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
+import { signalerProbleme } from "../../../lib/alertes";
 
 
 // Cette route cherche les paiements Stripe réussis qui n'ont aucune commande dans Happyvo
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
     .select("stripe_session_id")
     .in("stripe_session_id", payees.map((s) => s.id));
   if (error) {
+    await signalerProbleme("Contrôle des paiements : lecture des commandes impossible", { message: error.message });
     return NextResponse.json({ erreur: "Lecture des commandes impossible : " + error.message }, { status: 500 });
   }
   const connues = new Set((lignes ?? []).map((l) => String(l.stripe_session_id)));
@@ -80,10 +82,16 @@ export async function GET(request: NextRequest) {
       { onConflict: "reference", ignoreDuplicates: true }
     );
     if (erreurAlerte) {
+      await signalerProbleme("Contrôle des paiements : écriture de l'alerte impossible", { message: erreurAlerte.message });
       return NextResponse.json({ erreur: "Écriture de l'alerte impossible : " + erreurAlerte.message }, { status: 500 });
     }
+    await signalerProbleme("Paiement(s) Stripe réussi(s) sans commande", {
+      nombre: orphelines.length,
+      references: orphelines.map((s) => s.id),
+    });
   }
 
 
   return NextResponse.json({ verifiees: payees.length, orphelines: orphelines.length });
 }
+
